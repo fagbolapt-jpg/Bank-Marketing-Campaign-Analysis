@@ -1,179 +1,127 @@
 # Bank Marketing Campaign Analysis
 
-## Project Overview
-
-This project analyses a bank's direct marketing campaign to identify the customer characteristics and campaign strategies associated with successful term deposit subscriptions.
-
-Using SQL for exploratory and business analysis and Power BI for interactive visualisation, the project examines customer demographics, financial profiles, previous campaign outcomes, and contact strategies to uncover actionable insights that can improve future marketing performance.
-
-> **Project Context:** This project was completed as an end-to-end analytics case study, covering data exploration, business analysis, dashboard development, and stakeholder reporting.
-
-**Dataset Size:** 11,162 customer records × 17 variables
-
-**Tools Used:**
-- MySQL Workbench
-- Power BI
-- Microsoft Word
-- Microsoft PowerPoint
+**Author:** Patricia Fagbola
+**Tools:** MySQL Workbench, Power BI, Microsoft Word, Microsoft PowerPoint
 
 ---
 
-# Dashboard Preview
+## Summary
 
-![Overview Dashboard](screenshots/Overview_Dashboard_page.png)
-
-![Financial Profile and Contact Strategy](screenshots/Important_charts.png)
+I analysed a bank's direct marketing campaign of 11,162 customers to find out which customer segments are most likely to subscribe to a term deposit, so future campaigns can target more efficiently instead of contacting everyone equally. Overall, 47.38% of customers contacted subscribed. The strongest signal was previous campaign success: customers who had subscribed before converted at 91.32%, almost double the overall rate, but they made up only 9.6% of everyone contacted. Students and retirees converted far above average, cellular contact outperformed telephone, and conversion was highest in December and lowest in May.
 
 ---
 
-# Business Problem
+## Introduction
 
-Banks invest significant resources in telemarketing campaigns to promote financial products such as term deposits. However, contacting every customer equally is both costly and inefficient.
+Banks invest heavily in telemarketing campaigns to promote financial products such as term deposits, but contacting every customer equally is costly and inefficient.
 
-The objective of this project was to identify the customer segments most likely to subscribe, evaluate the effectiveness of previous marketing efforts, and provide recommendations that could improve campaign targeting and conversion rates.
+This project looks at a past campaign's results to understand which customers actually convert, so future campaigns can be targeted rather than blanket.
 
 ---
 
-# Repository Structure
+## Business Problem
 
-```text
-bank-marketing-analysis/
-│
-├── sql/
-│   └── Bank_marketing_analysis.sql
-│
-├── dashboard/
-│   └── bank_marketing_dashboard.pbix
-│
-├── report/
-│   └── Bank_Marketing_Case_Study_Report.docx
-│
-├── presentation/
-│   └── Bank_Marketing_Case_Study_Presentation.pptx
-│
-├── screenshots/
-│   ├── Overview_Dashboard_page.png
-│   └── Important_charts.png
-│
-└── README.md
+The bank needed to know which customer segments are most likely to subscribe to a term deposit, whether previous campaign outcomes predict future conversion, and which contact strategies perform best, so that marketing effort and cost could be focused on higher-probability customers instead of contacting the full customer base.
+
+---
+
+## Dataset Overview
+
+- **Records:** 11,162 customers
+- **Attributes:** 17 columns covering demographics, financial profile, and campaign history
+- **Source:** [add where you got the dataset]
+- **Target variable:** deposit (yes/no)
+
+**Data quality:**
+- No missing values in age, balance, or duration
+- "Unknown" values found in: job (70), education (497), contact (2,346), poutcome (8,326)
+- Target split: 5,289 subscribed (47.38%), 5,873 did not (52.62%)
+
+---
+
+## Method of Analysis
+
+The analysis was done in MySQL Workbench, using SQL for exploration and business analysis, then visualised in Power BI.
+
+The workflow:
+- Checked row count, column structure, and data types
+- Assessed missing and "unknown" values across categorical fields
+- Pulled summary statistics (min, max, average) for the numeric fields: age, balance, duration, campaign, pdays, previous
+- Grouped customers by age, job, education, housing loan, personal loan, previous outcome, contact method, and month to calculate conversion rate per segment
+- Built an interactive Power BI dashboard from the results
+
+Conversion rate is calculated as customers who subscribed divided by total customers in that group, for example:
+
+```sql
+SELECT job,
+  COUNT(*) AS total,
+  SUM(CASE WHEN deposit = 'yes' THEN 1 ELSE 0 END) AS converted,
+  ROUND(SUM(CASE WHEN deposit = 'yes' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS conversion_rate
+FROM bank
+GROUP BY job
+ORDER BY conversion_rate DESC;
 ```
 
 ---
 
-# Analysis Workflow
+## Dashboard
 
-The project followed a structured analytics workflow:
+The dashboard has three pages: an overview page, a financial profile and contact strategy page, and an insights and recommendations page.
 
-1. Explored and assessed the raw dataset using MySQL.
-2. Evaluated data quality and reviewed missing or unknown values.
-3. Performed business analysis across customer demographics, financial characteristics, and campaign history.
-4. Calculated conversion rates for key customer segments.
-5. Built an interactive Power BI dashboard to communicate findings.
-6. Produced a written case study and presentation summarising business recommendations.
+![Overview dashboard](Overview_Dashboard_page.png)
 
----
+![Financial profile and contact strategy](Important_charts.png)
 
-# Data Exploration
-
-Before analysis, the dataset was assessed to understand its structure and overall quality.
-
-Key exploration activities included:
-
-- Confirmed **11,162 customer records** across **17 variables**
-- Reviewed missing and `"unknown"` values across categorical fields
-- Verified completeness of key numerical variables including Age, Balance, Duration, Campaign, Pdays and Previous
-- Generated descriptive statistics to understand customer and campaign distributions
+To explore the full dashboard, open `dashboard/bank_marketing_dashboard.pbix` in Power BI.
 
 ---
 
-# Business Questions
+## Insights
 
-The analysis explored the following questions:
+**1. Past subscribers are a warm lead.** Customers who subscribed during a previous campaign converted at 91.32%, compared to 50.33% for a previous failure and an overall average of 47.38%. Despite converting at nearly double the average, they represented only 9.6% of all customers contacted, suggesting the bank is under-using its highest-converting audience.
 
-- Which customer groups have the highest subscription rates?
-- Does previous campaign success influence future conversion?
-- How do occupation and education affect subscription behaviour?
-- Do existing housing or personal loans influence conversion?
-- Which contact method performs best?
-- Does the number of contact attempts affect campaign success?
-- Are there seasonal patterns in customer subscriptions?
+**2. Profession matters.** Conversion varies widely by profession, from 74.72% for students and 66.32% for retirees down to 36.42% for blue-collar workers and 37.5% for entrepreneurs, roughly a 2x gap. Blue-collar workers and technicians, the two largest job segments at 33% of all contacts combined, both converted below the 47.38% overall average.
 
----
+**3. It's life stage, not just age.** Customers aged 60 and above and those aged 18 to 30 convert at a noticeably higher rate than customers aged 31 to 60, likely because middle-aged customers are juggling more financial commitments.
 
-# Key Findings
+**4. Education correlates with conversion.** Customers with tertiary education consistently convert at a higher rate than those with primary education, across most job categories. This may reflect financial literacy or familiarity with savings products.
 
-### Previous campaign success is the strongest predictor of conversion
+**5. Existing debt lowers conversion.** Customers without a housing or personal loan convert at roughly double the rate of customers who hold one.
 
-Customers who subscribed during a previous campaign converted at **91.32%**, almost double the overall conversion rate of **47.4%**. Despite this, they represented only **9.6%** of all customers contacted, suggesting an opportunity for more targeted follow-up campaigns.
+**6. Channel and frequency matter.** Cellular contact outperforms telephone, and conversion drops sharply after a few contact attempts.
 
-### Profession strongly influences conversion
+**7. Conversion peaks in December and March.** This is likely tied to year-end bonus and savings behaviour, though lower contact volume in these months may also be inflating the rate.
 
-Students (**74.72%**) and retirees (**66.32%**) recorded the highest subscription rates, while blue-collar workers (**36.42%**) and entrepreneurs (**37.5%**) converted significantly below average.
-
-### Existing debt reduces subscription likelihood
-
-Customers with housing or personal loans consistently converted at lower rates than customers without existing debt.
-
-### Contact strategy affects campaign performance
-
-Cellular communication achieved the strongest conversion results, while subscription rates declined noticeably after more than two or three contact attempts.
-
-### Subscription behaviour follows seasonal patterns
-
-Conversion rates were highest in **December** and lowest in **May**, indicating that campaign timing may influence customer response.
+**Limitations:** This is historical campaign data. It shows which segments converted more, not why, and factors like loan status, education, or contact method may be correlated with conversion without directly causing it. The seasonal pattern in particular should be checked against contact volume before acting on it, since fewer contacts in a given month can inflate its conversion rate.
 
 ---
 
-# Recommendations
+## Recommendations
 
-Based on the analysis, the following actions could improve campaign effectiveness:
-
-1. Prioritise customers with previously successful campaign outcomes for future marketing campaigns.
-2. Investigate why blue-collar and entrepreneur segments convert below average before maintaining current targeting levels.
-3. Limit customer contact attempts to two or three interactions before reallocating effort towards new prospects.
-4. Continue prioritising cellular communication as the primary customer contact channel.
-5. Schedule larger campaign activities around historically higher-converting months such as December and March.
-
----
-
-# Business Value
-
-This project demonstrates how customer segmentation and campaign analytics can support more effective marketing decisions. By identifying high-converting customer groups, evaluating campaign effectiveness, and analysing behavioural patterns, the findings provide practical recommendations for improving conversion rates while reducing unnecessary marketing effort.
+1. **Re-engage past subscribers.** This is the highest-converting segment, so prioritise renewed outreach to them.
+2. **Investigate the profession gap.** Students and retirees convert far more than blue-collar workers and entrepreneurs, but the reason is unclear and needs further research before targeting on profession alone.
+3. **Re-think messaging for middle-aged customers,** the lowest-converting age group. Test offers suited to their financial stage rather than using the same pitch across all ages.
+4. **Simplify the pitch.** Spend more time explaining term deposit benefits, especially to less financially literate customers.
+5. **Explore the loan and debt link** before designing offers for customers who already hold loans, since they convert less.
+6. **Prioritise cellular contact** as the primary channel, keeping telephone as backup only.
+7. **Cap contact attempts at two to three calls.** Conversion drops sharply after that, so redirect effort to new leads instead.
+8. **Time major campaign pushes around December and March,** the higher-converting months, but confirm the pattern holds even after accounting for contact volume before committing staffing and budget to it.
 
 ---
 
-# Skills Demonstrated
+## Repository Structure
 
-- SQL (MySQL)
-- Exploratory Data Analysis (EDA)
-- Customer Segmentation
-- Conversion Rate Analysis
-- Business Analysis
-- Data Quality Assessment
-- Power BI Dashboard Development
-- Data Visualisation
-- Business Storytelling
-- Technical Reporting
-- Stakeholder Presentation
-
----
-
-# Deliverables
-
-The repository includes:
-
-- SQL analysis scripts
-- Interactive Power BI dashboard
-- Written business case study
-- Executive presentation summarising findings and recommendations
-
----
-
-# Author
-
-**Patricia Fagbola**
-
-Aspiring Data Analyst with experience in SQL, Excel, Power BI, and Python.
-
-- Email: fagbola.pt@gmail.com
-- LinkedIn: https://www.linkedin.com/in/patricia-fagbola-656566387
+```text
+bank-marketing-analysis/
+├── README.md
+├── sql/
+│   └── Bank_marketing_analysis.sql
+├── dashboard/
+│   └── bank_marketing_dashboard.pbix
+├── report/
+│   └── Bank_Marketing_Case_Study_Report.docx
+├── presentation/
+│   └── Bank_Marketing_Case_Study_Presentation.pptx
+├── Overview_Dashboard_page.png
+└── Important_charts.png
+```
